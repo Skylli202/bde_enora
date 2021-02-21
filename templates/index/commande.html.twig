@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BDE Ampère : Commande{% endblock %}
+
+{% block stylesheets %}
+
+{% endblock %}
+
+
+{% block body %}
+    <div class="mt-5">
+        <h1 class="text-center text-danger">VENTE ROSE AMPERE</h1>
+    </div>
+    <div class="mt-5">
+        {{ include('/type/_commande_rose_type.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        var classeFrom = $('#commande_rose_classeFrom');
+        // When sport gets selected ...
+        classeFrom.change(function() {
+            // ... retrieve the corresponding form.
+            var $form = $(this).closest('form');
+            // Simulate form data, but only include the selected sport value.
+            var data = {};
+            data[classeFrom.attr('name')] = classeFrom.val();
+            // Submit data via AJAX to the form's action path.
+            $.ajax({
+                url : $form.attr('action'),
+                type: $form.attr('method'),
+                data : data,
+                success: function(html) {
+                    // Replace current position field ...
+                    $('#commande_rose_from').replaceWith(
+                        // ... with the returned one from the AJAX response.
+                        $(html).find('#commande_rose_from')
+                    );
+                    // Position field now displays the appropriate positions.
+                }
+            });
+        });
+
+        var $classeTo = $('#commande_rose_classeTo');
+        $classeTo.change(function() {
+            var $form = $(this).closest('form');
+            var data = {};
+            data[$classeTo.attr('name')] = $classeTo.val();
+            $.ajax({
+                url : $form.attr('action'),
+                type: $form.attr('method'),
+                data : data,
+                success: function(html) {
+                    $('#commande_rose_to').replaceWith(
+                        $(html).find('#commande_rose_to')
+                    );
+                }
+            });
+        });
+    </script>
+{% endblock %}
+

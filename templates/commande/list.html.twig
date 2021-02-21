@@ -1,0 +1,177 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Liste des commandes
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .selected {
+            border:3px solid green;
+        }
+    </style>
+{% endblock %}
+
+
+{% block body %}
+    <div class="jumbotron mt-4" style="display: none;">
+        <h4>Commande sélectionnée</h4>
+        <p id="head" class="lead">Par :  | Pour :  | Le :  </p>
+        <hr class="my-4">
+        <p id="msg"></p>
+
+        <div class="d-flex pt-2 justify-content-around">
+            <a id="toggle-validation" href="#" class="btn btn-primary">Marquer comme valide</a>
+            <a id="toggle-delivered"  href="#" class="btn btn-primary">Marquer comme livrée</a>
+            <a id="printMsg" href="#" class="btn btn-primary">Imprimer le message</a>
+        </div>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Par</th>
+            <th scope="col">Pour</th>
+            <th scope="col">Commandé le</th>
+            <th scope="col">Validé</th>
+            <th scope="col">Livré</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for commande in commandes %}
+            <tr id="row_{{ commande.id }}" class="commande">
+                <th id="id_{{ commande.id }}" scope="row">{{ commande.id }}</th>
+                <td id="from_{{ commande.id }}">{{ commande.par.fullname }}</td>
+                <td id="to_{{ commande.id }}">{{ commande.pour.fullname }}</td>
+                <td id="orderDate_{{ commande.id }}">{{ commande.orderDate |date('d/m/Y - h:m') }}</td>
+                <td id="valid_{{ commande.id }}">{% if commande.valid %}oui{% else %}non{% endif %}</td>
+                <td id="delivered_{{ commande.id }}">{% if commande.delivered %}oui{% else %}non{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        let selectedElement = ""
+        $(document).ready(function() {
+            console.log( "ready!" );
+
+
+            $("#toggle-validation").click(() => {
+                let data = {
+                    commande: $('#head').data('commande')
+                }
+
+                $.ajax({
+                    method: 'GET',
+                    url: '{{ path('ajax-toggle-commande-validation') }}',
+                    data: data,
+                    success: function (json) {
+                        update(json)
+                    },
+                    error: function () {
+                        ajaxError()
+                    }
+                });
+            });
+
+            $("#toggle-delivered").click(() => {
+                let data = {
+                    commande: $('#head').data('commande')
+                }
+
+                $.ajax({
+                    method: 'GET',
+                    url: '{{ path('ajax-toggle-commande-delivered') }}',
+                    data: data,
+                    success: function (json) {
+                        update(json)
+                    },
+                    error: function () {
+                        ajaxError()
+                    }
+                });
+            });
+
+            $('#printMsg').click(() => {
+                // let elem = $("#msg")
+                // console.log(elem[0])
+                PrintElem('msg')
+            })
+
+            $(".commande").click((el) => {
+                if (selectedElement !== "") {
+                    selectedElement.removeClass("selected")
+                }
+                selectedElement = $("#"+el.currentTarget.id)
+                selectedElement.addClass('selected')
+
+                let data = {
+                    commande: selectedElement[0].id.split('_')[1]
+                }
+                // console.log(data)
+                $.ajax({
+                    method : 'GET',
+                    url : '{{ path('ajax-get-commande') }}',
+                    data: data,
+                    success: function (json) {
+                        // console.log(json)
+                        update(json)
+                    },
+                    error: function () {
+                        ajaxError()
+                    }
+                });
+
+                $('.jumbotron').show()
+            });
+        });
+
+        function ajaxError() {
+            console.log("Something got wrong, oups !")
+        }
+
+        function update(json) {
+            $('#head').html('Par : ' + json['from'] + ' | Pour : '+json['to'] + ' | Le : ' + json['creationDate'])
+            $('#head').data('commande', json['id'])
+            $('#msg').html(json['msg'])
+            if (json['valid']) {
+                $('#valid_'+json['id']).html("oui")
+                $('#toggle-validation').html("Marquer comme invalide")
+            } else {
+                $('#valid_'+json['id']).html("non")
+                $('#toggle-validation').html("Marquer comme valide")
+            }
+            if (json['delivered']) {
+                $('#delivered_'+json['id']).html("oui")
+                $('#toggle-delivered').html("Marquer comme non livrée")
+            } else {
+                $('#delivered_'+json['id']).html("non")
+                $('#toggle-delivered').html("Marquer comme livrée")
+            }
+        }
+
+        function PrintElem(elem)
+        {
+            var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+
+            // mywindow.document.write('<html><head><title>' + document.title  + '</title>');
+            mywindow.document.write('<html><head></head><bodyf>');
+            // mywindow.document.write('<h1>' + document.title  + '</h1>');
+            mywindow.document.write(document.getElementById(elem).innerHTML);
+            mywindow.document.write('</body></html>');
+
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+
+            mywindow.print();
+            mywindow.close();
+
+            return true;
+        }
+    </script>
+{% endblock %}
+
