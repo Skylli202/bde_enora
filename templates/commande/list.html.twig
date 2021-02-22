@@ -44,7 +44,7 @@
                 <th id="id_{{ commande.id }}" scope="row">{{ commande.id }}</th>
                 <td id="from_{{ commande.id }}">{{ commande.par.fullname }}</td>
                 <td id="to_{{ commande.id }}">{{ commande.pour.fullname }}</td>
-                <td id="orderDate_{{ commande.id }}">{{ commande.orderDate |date('d/m/Y - h:m') }}</td>
+                <td id="orderDate_{{ commande.id }}">{{ commande.orderDate |date('d/m/Y - H:i') }}</td>
                 <td id="valid_{{ commande.id }}">{% if commande.valid %}oui{% else %}non{% endif %}</td>
                 <td id="delivered_{{ commande.id }}">{% if commande.delivered %}oui{% else %}non{% endif %}</td>
             </tr>

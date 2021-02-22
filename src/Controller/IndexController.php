@@ -30,8 +30,6 @@ class IndexController extends AbstractController
             $to = $data['to'];
             $msg = $data['msg'];
 
-            dump($from->getFullname() . " envoie une rose à " . $to->getFullname());
-
             $commande = new Commande();
             $commande
                 ->setPar($from)
@@ -39,12 +37,11 @@ class IndexController extends AbstractController
                 ->setOrderDate(new DateTime())
                 ->setMessage($msg)
             ;
-            dump($commande);
 
             $this->getDoctrine()->getManager()->persist($commande);
             $this->getDoctrine()->getManager()->flush();
 
-            die();
+            return $this->redirectToRoute('index');
         }
 
         return $this->render('index/commande.html.twig', [
